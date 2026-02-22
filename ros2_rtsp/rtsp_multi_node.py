@@ -24,6 +24,7 @@ class RtspCameraWorker:
         username,
         password,
         rtsp_path,
+        audio_rtsp_path,
         low_latency,
         drop_frames,
         max_grab,
@@ -34,6 +35,7 @@ class RtspCameraWorker:
         self.username = username
         self.password = password
         self.rtsp_path = rtsp_path
+        self.audio_rtsp_path = audio_rtsp_path or rtsp_path
         self.low_latency = low_latency
         self.drop_frames = drop_frames
         self.max_grab = max_grab
@@ -54,12 +56,12 @@ class RtspCameraWorker:
     def stop(self):
         self.stop_event.set()
 
-    def _rtsp_url(self):
-        path = self.rtsp_path.lstrip("/")
+    def _rtsp_url(self, path):
+        path = path.lstrip("/")
         return f"rtsp://{self.username}:{self.password}@{self.ip}:554/{path}"
 
     def _video_loop(self):
-        url = self._rtsp_url()
+        url = self._rtsp_url(self.rtsp_path)
         backoff = 1.0
         while not self.stop_event.is_set() and rclpy.ok():
             if self.low_latency:
@@ -125,7 +127,7 @@ class RtspCameraWorker:
             )
             return
 
-        url = self._rtsp_url()
+        url = self._rtsp_url(self.audio_rtsp_path)
         cmd = [
             "ffmpeg",
             "-rtsp_transport",
@@ -209,6 +211,7 @@ class RtspMultiNode(Node):
             descriptor=ParameterDescriptor(type=ParameterType.PARAMETER_STRING),
         )
         self.declare_parameter("rtsp_path", "stream2")
+        self.declare_parameter("audio_rtsp_path", "")
         self.declare_parameter("low_latency", True)
         self.declare_parameter("drop_frames", True)
         self.declare_parameter("max_grab", 5)
@@ -221,6 +224,7 @@ class RtspMultiNode(Node):
         username = self.get_parameter("user_name").value
         password = self.get_parameter("user_password").value
         rtsp_path = self.get_parameter("rtsp_path").value
+        audio_rtsp_path = self.get_parameter("audio_rtsp_path").value
         low_latency = bool(self.get_parameter("low_latency").value)
         drop_frames = bool(self.get_parameter("drop_frames").value)
         max_grab = int(self.get_parameter("max_grab").value)
@@ -239,6 +243,7 @@ class RtspMultiNode(Node):
                 username,
                 password,
                 rtsp_path,
+                audio_rtsp_path,
                 low_latency,
                 drop_frames,
                 max_grab,

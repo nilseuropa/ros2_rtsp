@@ -13,6 +13,7 @@ def generate_launch_description():
                 "user_name": "",
                 "user_password": "",
                 "rtsp_path": "stream2",
+                "audio_rtsp_path": "",
             }],
             output="screen",
         )
