@@ -21,6 +21,7 @@ setup(
     entry_points={
         "console_scripts": [
             "rtsp_multi = ros2_rtsp.rtsp_multi_node:main",
+            "audio_monitor = ros2_rtsp.audio_monitor_node:main",
         ],
     },
 )
